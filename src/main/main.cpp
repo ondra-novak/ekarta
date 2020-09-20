@@ -1,7 +1,10 @@
+#include <main/rpcInterface.h>
+#include <main/session.h>
 #include <shared/default_app.h>
 #include <simpleServer/abstractService.h>
 #include <rpc/rpcServer.h>
 #include <simpleServer/threadPoolAsync.h>
+#include "db.h"
 
 
 using namespace ondra_shared;
@@ -42,26 +45,42 @@ int main(int argc, char **argv) {
 
 int MainApp::run(ServiceControl svc, ArgList args) {
 
-	svc.enableRestart();
+	//----------- init -------------------
 
 	auto serverSection = config["server"];
+	auto dbSection = config["db"];
+	auto sessionSection = config["session"];
 
+	auto dbcfg = CouchDB::initDB(dbSection);
+	PCouchDB db = new CouchDB(dbcfg);
 
-	AsyncProvider async = ThreadPoolAsync::create(
-			serverSection.mandatory["threads"].getUInt(),
-			serverSection.mandatory["dispatchers"].getUInt()
-	);
+	PSessionCntr sesCntr = new Session(sessionSection.mandatory["public_key"].getPath());
 
-	RpcHttpServer rpcsrv(NetAddr::create(serverSection.mandatory["listen"].getString(),7788,NetAddr::IPvAll),async);
-	rpcsrv.addRPCPath("/RPC", RpcHttpServer::Config{
+	RpcHttpServer::Config svrcfg {
 		serverSection["console"].getBool(true),
 		serverSection["websocket"].getBool(true),
 		serverSection["direct"].getBool(true),
 		serverSection["maxReqSize"].getUInt(1024*1024),
-	});
+	};
+	unsigned int thread_cnt = serverSection.mandatory["threads"].getUInt();
+	unsigned int disp_cnt = serverSection.mandatory["dispatchers"].getUInt();
+	auto naddr = NetAddr::create(serverSection.mandatory["listen"].getString(),7788,NetAddr::IPvAll);
+
+	PRpcInterface rpcifc = new RpcInterface(db, sesCntr);
+
+	//----------- start ------------
+
+	svc.enableRestart();
+
+	AsyncProvider async = ThreadPoolAsync::create(thread_cnt,disp_cnt);
+
+
+	RpcHttpServer rpcsrv(naddr,async);
+	rpcsrv.addRPCPath("/RPC", svrcfg);
 	rpcsrv.add_listMethods();
 	rpcsrv.add_ping();
 
+	rpcifc->init(rpcsrv);
 
 	rpcsrv.start();
 
