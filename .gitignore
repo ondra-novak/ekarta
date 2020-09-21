@@ -15,4 +15,3 @@ Makefile
 /www/fav_*.png
 generated
 /errors.log
-build
