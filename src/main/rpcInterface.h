@@ -31,7 +31,8 @@ protected:
 	PCouchDB db;
 	PSessionCntr session;
 
-	bool checkACL_RO(Session::PSession ses, const StrViewA cmpId) const;
+	json::Value getACL(Session::PSession ses, const StrViewA cmpId) const;
+
 };
 
 using PRpcInterface = ondra_shared::RefCntPtr<RpcInterface>;
