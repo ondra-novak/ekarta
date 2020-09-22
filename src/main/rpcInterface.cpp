@@ -139,13 +139,23 @@ json::Value RpcInterface::getACL(Session::PSession ses, const StrViewA cmpId) co
 }
 
 void RpcInterface::rpcListObjects(json::RpcRequest req) {
-	if (!req.checkArgs({"string"})) return req.setArgError();
-	Value key = req.getArgs()[0];
 	auto ses = session->parseSession(req, true);
 	if (ses != nullptr) {
-		if (!getACL(ses, key.getString()).defined())
-			return req.setError(404, "Company not found");
-		Result res(db->createQuery(view_objects2cmp).key(key).exec());
+		Value keys = req.getArgs();
+		Result cres(db->createQuery(view_companies2user).key(ses->user.toString()).exec());
+		auto allComps = cres.map([](Row rw){
+				return rw.id;
+		}).sort(Value::compare);
+		if (keys.empty()) keys = allComps;
+		else {
+			keys = keys.filter([&](Value a){
+				return allComps.find(a) != json::undefined;
+			});
+		}
+		if (keys.empty()) {
+			return req.setError(404,"Not found");
+		}
+		Result res(db->createQuery(view_objects2cmp).keys(keys).exec());
 		Object out;
 		for (Row rw: res) out.set(rw.id.getString(), rw.value);
 		req.setResult(out);
