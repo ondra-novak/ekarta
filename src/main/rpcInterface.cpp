@@ -170,7 +170,7 @@ void RpcInterface::rpcGetObjects(json::RpcRequest req) {
 		ids.reserve(req.getArgs().size());
 		std::transform(req.getArgs().begin(), req.getArgs().end(),std::back_inserter(ids),
 				[&](Value n){return CouchDB::MGetItem{n.getString(),StrViewA()};});
-		Value mres = db->mget(ids.begin(), ids.end(), db->flgRevisions);
+		Value mres = db->mget(ids.begin(), ids.end(), 0);
 		Object out;
 		int idx = 0;
 		for (Value doc: mres) {
@@ -322,15 +322,6 @@ void RpcInterface::rpcPutObjects(json::RpcRequest req) {
 				for (const auto &a: chset.getCommitedDocs()) {
 					Document d = a.doc;
 					d.setRev(a.newRev);
-					{
-						auto revs = d.object("_revisions");
-						couchit::Revision rev (a.newRev);
-						Value ids = revs["ids"];
-						if (ids.type() != json::array) ids = json::array;
-						ids.unshift(Value(rev.getTag()));
-						revs.set("ids", ids);
-						revs.set("start", rev.getRevId());
-					}
 					output.set(a.id, d);
 				}
 			} catch (const couchit::UpdateException &e) {

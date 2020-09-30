@@ -79,6 +79,9 @@ int MainApp::run(ServiceControl svc, ArgList args) {
 	rpcsrv.addRPCPath("/RPC", svrcfg);
 	rpcsrv.add_listMethods();
 	rpcsrv.add_ping();
+	rpcsrv.setHostMapping(serverSection["mapHosts"].getString(""));
+
+
 
 	rpcifc->init(rpcsrv);
 

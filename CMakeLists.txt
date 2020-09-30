@@ -26,7 +26,7 @@ add_subdirectory (src/simpleServer/src/simpleServer EXCLUDE_FROM_ALL)
 add_subdirectory (src/simpleServer/src/rpc EXCLUDE_FROM_ALL)
 add_subdirectory (src/couchit/src/couchit EXCLUDE_FROM_ALL)
 add_subdirectory (src/main)
-
+add_subdirectory (web)
 
 install(DIRECTORY conf DESTINATION ".") 
 install(DIRECTORY www DESTINATION ".") 
