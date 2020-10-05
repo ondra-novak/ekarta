@@ -1,0 +1,12 @@
+# comment
+!charset utf-8
+!defer_css yes
+!defer_script yes	
+!entry_point App.start()
+!css res/index.css
+!js res/index.js
+!container @svc service_worker.js
+
+
+src/main
+ 
