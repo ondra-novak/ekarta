@@ -2023,12 +2023,14 @@ App.start = async function() {
 App.sync = function() {
 	if (this.svc) {
 		var token = localStorage["refresh_token"];
-		if (this.svc.sync) {
-	        var promise = this.msgdispatch.reg("sync");	
-    		this.svc.sync.register(token);
-			return promise.then((x,y)=>{
-				if (x === false) throw y;
-				else return true;
+		if (this.svc.sync && navigator.serviceWorker.controller) {
+			return navigator.serviceWorker.ready.then(()=>{
+		        var promise = this.msgdispatch.reg("sync");	
+	    		this.svc.sync.register(token);
+				return promise.then((x,y)=>{
+					if (x === false) throw y;
+					else return true;
+				});
 			});
 		}
 	}

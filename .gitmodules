@@ -10,3 +10,9 @@
 [submodule "src/simpleServer"]
 	path = src/simpleServer
 	url = https://www.github.com/ondra-novak/simpleServer.git
+[submodule "web/libs/template.js"]
+	path = web/libs/template.js
+	url = http://www.github.com/ondra-novak/template.js
+[submodule "web/libs/wappbuilder"]
+	path = web/libs/wappbuilder
+	url = http://www.github.com/ondra-novak/wappbuilder

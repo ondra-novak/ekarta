@@ -473,7 +473,7 @@ loginSupport = function(rpc, name, refresh_token, login_callback) {
 
 
 })();
-// timestamp: 1601935944
+// timestamp: 1601939652
 
 self.addEventListener('install', function(evt) {
 	console.log("install");
